@@ -133,3 +133,44 @@ TT=timetable(timestamp,dist,ilu,s);
 
 dt = minutes(30);
 moon = retime(TT,'regular','linear','TimeStep',dt);
+
+%% longterm daily mean and anomaly (creating '2020_int.mat', 2021_int.mat', '2022_int(til_may).mat', 'longterm_int1.mat', 'longterm_int2.mat', and 'longterm_runnningm_and_anomaly2.mat')
+   clearvars        
+     %2020 has [2 3 5 6 7 8 9 10 11 12]; 2021 has [1 2 3 4 6 7 8 9 10 11 12] ; 2022 has 1:5
+     load('202201_int_IFCB.mat'); % TO START year
+      M=table2cell(data);
+     Data_int=cell2mat(M(:,1));mdate_int=cell2mat(M(:,2));MDate_int=mdate_int.*24;% TO START
+   for i= 2:5     
+    m=num2str(i); if i<10,m=['0',num2str(i)];end 
+    file=strcat('2022',m,'_int_IFCB.mat'); %                      
+    load(file);
+    M=table2cell(data);
+    data_int2=cell2mat(M(:,1)); % change num in series
+    mdate_int=cell2mat(M(:,2));
+    mdate_int2=mdate_int.*24; % change to num in series
+                             
+        Data_int=cat(1,Data_int,data_int2); % change array added
+        MDate_int=cat(1,MDate_int,mdate_int2); % change array added
+   end
+save('2022_int(til_may).mat','Data_int','MDate_int')
+
+clearvars;load('2020_int.mat');d2021=Data_int;m2021=MDate_int; 
+load('2021_int.mat');
+Data_inti=cat(1,d2021,Data_int); % change array added
+        MDate_inti=cat(1,m2021,MDate_int); % change array added
+    load('2022_int(til_may).mat');
+    Data_int=cat(1,Data_inti,Data_int); % change array added
+        MDate_int=cat(1,MDate_inti,MDate_int); % change array added
+        save('longterm_int1.mat','Data_int','MDate_int');
+ datam=zeros(height(Data_int),97);
+    data_anom=zeros(height(Data_int),97);
+for j=26:height(MDate_int)-25
+    x=j-25;y=j+25;
+        datam(j,:)=mean(Data_int(x:y,:));
+        data_anom(j,:)=Data_int(j,:)-datam(j,:);
+end
+filem=strcat('longterm_runningm_and_anomaly2.mat');
+    save(filem,'datam','data_anom','MDate_int');
+
+
+
